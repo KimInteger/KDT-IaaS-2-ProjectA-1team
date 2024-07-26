@@ -1,21 +1,17 @@
-// AddBut.tsx code
 import React, { useRef, useState } from 'react';
-import { AddInput } from './addInput';
-import { DelBut } from './delBut';
-import { Label } from './label';
 
-export const AddBut = () => {
-  const [count, setCount] = useState(0);
-  const containerRef = useRef(null); // DOM 참조를 저장하기 위한 ref
+export const AddBut: React.FC = () => {
+  const [count, setCount] = useState<number>(0);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: number): void => {
     const element = document.getElementById(`set-${id}`);
     if (element) {
-      element.remove(); // DOM에서 직접 요소 삭제
+      element.remove();
     }
   };
 
-  const handleClick = () => {
+  const handleClick = (): void => {
     const id = count + 1;
     const newSet = document.createElement('div');
     newSet.id = `set-${id}`;
@@ -38,13 +34,15 @@ export const AddBut = () => {
     // Button 생성 및 추가
     const button = document.createElement('button');
     button.textContent = '항목 삭제';
-    button.onclick = () => handleDelete(id); // 클릭 이벤트 핸들러 설정
+    button.onclick = () => handleDelete(id);
     newSet.appendChild(button);
 
     // 컨테이너에 새로운 세트 추가
-    containerRef.current.appendChild(newSet);
+    if (containerRef.current) {
+      containerRef.current.appendChild(newSet);
+    }
 
-    setCount(count + 1);
+    setCount(id);
   };
 
   return (
