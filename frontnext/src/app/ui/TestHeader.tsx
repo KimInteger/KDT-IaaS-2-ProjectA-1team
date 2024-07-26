@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import styles from './headerStyles.module.css'; // CSS 모듈 파일을 import
+import styles from '../headerStyles.module.css'; // CSS 모듈 파일을 import
 
 const TestHeader: React.FC = () => {
   const router = useRouter();
