@@ -7,14 +7,17 @@ import { styles } from './testComponent/stylesContent';
 import {
   SUCCESS_MESSAGE,
   FAILURE_MESSAGE,
+  LOGIN_FAIL_MESSAGE,
 } from './testComponent/labelsContent';
 import { fetchData } from '../lib/fetchDataTest';
+import LoginCheckFalseModal from './modalComponent/loginCheckFalseModal';
 
 const RenderLoginFormSection: React.FC = () => {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoginSuccess, setIsLoginSuccess] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,7 +29,12 @@ const RenderLoginFormSection: React.FC = () => {
     } else {
       setMessage(FAILURE_MESSAGE);
       setIsSuccess(false);
+      setIsLoginSuccess(true);
     }
+  };
+
+  const handleCloseModal = (): void => {
+    setIsLoginSuccess(false);
   };
 
   return (
@@ -41,6 +49,12 @@ const RenderLoginFormSection: React.FC = () => {
         />
       ) : (
         <Message message={message} isSuccess={isSuccess} />
+      )}
+      {isLoginSuccess && (
+        <LoginCheckFalseModal
+          alertmessage={LOGIN_FAIL_MESSAGE}
+          onClose={handleCloseModal}
+        />
       )}
     </div>
   );
