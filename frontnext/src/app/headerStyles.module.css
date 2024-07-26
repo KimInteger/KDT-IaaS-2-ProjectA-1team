@@ -1,29 +1,24 @@
 .header {
-  height: 200px;
+  height: 60px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: row;
   background-color: #f8f9fa; /* 헤더 배경색 */
   border-bottom: 1px solid #dee2e6; /* 하단 경계선 */
 }
 
 .tab {
-  width: 300px;
+  width: 150px;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   border-right: 1px solid #dee2e6; /* 탭 간 구분선 */
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   transition: background-color 0.3s;
 }
 
 .tab:hover {
   background-color: #e9ecef; /* 탭에 마우스 오버 시 배경색 변화 */
-}
-
-.tab:last-child {
-  border-right: none; /* 마지막 탭의 우측 경계선 제거 */
 }
