@@ -12,6 +12,7 @@ import { fetchData } from '../lib/fetchDataTest';
 
 // * 정호연이 작업한 모듈
 import TableModal from './modal/components/tableModal';
+import HeaderSection from './Header/headerSection';
 
 const RenderLoginFormSection: React.FC = () => {
   const [id, setId] = useState('');
@@ -32,24 +33,7 @@ const RenderLoginFormSection: React.FC = () => {
     }
   };
 
-  return (
-    <div id="root">
-      <TableModal />
-      <div className={styles.container}>
-        {message === null ? (
-          <Form
-            id={id}
-            password={password}
-            setId={setId}
-            setPassword={setPassword}
-            handleSubmit={handleSubmit}
-          />
-        ) : (
-          <Message message={message} isSuccess={isSuccess} />
-        )}
-      </div>
-    </div>
-  );
+  return <HeaderSection />;
 };
 
 export default RenderLoginFormSection;
