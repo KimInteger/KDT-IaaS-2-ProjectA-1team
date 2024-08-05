@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict
-from models import TableRequest
-from database import get_table_names, search_data_by_table_and_value
+from testSet.database import get_table_names, search_data_by_table_and_value
+from testSet.modules import TableRequest
 
 table_router = APIRouter()
 
