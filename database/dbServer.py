@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import sqlite3
 from typing import List
-from routers import table_router, data_router  # user_router, table_router, data_router를 불러온다.
+from router.routers import table_router, data_router  # user_router, table_router, data_router를 불러온다.
 
 app = FastAPI()
 
