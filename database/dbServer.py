@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import sqlite3
 from typing import List
 from routers import table_router, data_router  # user_router, table_router, data_router를 불러온다.
+from createToCopy import copy_table_structure
 
 app = FastAPI()
 
@@ -39,3 +40,15 @@ def verify_user(request: VerifyRequest):
 
 app.include_router(table_router)  # table_router를 추가한다.
 app.include_router(data_router)  # data_router를 추가한다.
+
+class Recommend(BaseModel):
+    table: str
+
+@app.post('/createRecommend')
+def create_recommend(request: Recommend):
+    print('createRecommend')
+    copy_table_structure(request.table)
+
+    print(bool(request.table))
+    # JSON 응답으로 반환
+    return {"success": bool(request.table)}
