@@ -22,11 +22,17 @@ class ColumnDeleteRequest(BaseModel):
 class ColumnAddRequest(BaseModel):
     column_name: str
 
+class RowUpdateRequest(BaseModel):
+    row_id: int
+    updated_values: dict
+
+
 def get_db_connection():
     conn = sqlite3.connect('test.db')
     conn.row_factory = sqlite3.Row
     return conn
 
+# 전체 테이블 정보 조회 현재 있는 table을 렌더링하기 위함
 @app.get("/tables")
 async def get_tables():
     conn = get_db_connection()
@@ -35,6 +41,7 @@ async def get_tables():
     conn.close()
     return {"tables": tables}
 
+# 특정 테이블 내부의 데이터 조회
 @app.get("/table/{table_name}")
 async def get_table_data(table_name: str):
     conn = get_db_connection()
@@ -46,6 +53,7 @@ async def get_table_data(table_name: str):
     conn.close()
     return {"schema": schema, "rows": [dict(zip(['rowid'] + schema, row)) for row in rows]}
 
+# 행 삭제 처리
 @app.post("/table/{table_name}/delete_row")
 async def delete_row(table_name: str, request: RowDeleteRequest):
     conn = get_db_connection()
@@ -55,6 +63,7 @@ async def delete_row(table_name: str, request: RowDeleteRequest):
     conn.close()
     return {"status": "success"}
 
+# 열 삭제 처리
 @app.post("/table/{table_name}/delete_column")
 async def delete_column(table_name: str, request: ColumnDeleteRequest):
     column_name = request.column_name
@@ -103,6 +112,7 @@ async def delete_column(table_name: str, request: ColumnDeleteRequest):
     conn.close()
     return {"status": "success"}
 
+# 행추가 처리
 @app.post("/table/{table_name}/add_row")
 async def add_row(table_name: str, request: dict):
     conn = get_db_connection()
@@ -125,6 +135,7 @@ async def add_row(table_name: str, request: dict):
     conn.close()
     return {"status": "success"}
 
+# 열추가 처리
 @app.post("/table/{table_name}/add_column")
 async def add_column(table_name: str, request: ColumnAddRequest):
     column_name = request.column_name
@@ -141,6 +152,27 @@ async def add_column(table_name: str, request: ColumnAddRequest):
         raise HTTPException(status_code=500, detail=str(e))
     
     conn.close()
+    return {"status": "success"}
+
+
+# 행 수정(update) 처리
+@app.post("/table/{table_name}/update_row")
+async def update_row(table_name: str, request: RowUpdateRequest):
+    row_id = request.row_id
+    updated_values = request.updated_values
+
+    if not updated_values:
+        raise HTTPException(status_code=400, detail="No values to update")
+
+    set_clause = ", ".join([f"{key} = ?" for key in updated_values.keys()])
+    values = list(updated_values.values()) + [row_id]
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(f"UPDATE {table_name} SET {set_clause} WHERE rowid = ?", values)
+    conn.commit()
+    conn.close()
+
     return {"status": "success"}
 
 if __name__ == "__main__":
