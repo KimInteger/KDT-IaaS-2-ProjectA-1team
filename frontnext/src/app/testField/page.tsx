@@ -26,6 +26,8 @@ const Home = () => {
     null,
   );
   const [editingRowId, setEditingRowId] = useState<number | null>(null);
+  const [editingColumn, setEditingColumn] = useState<string | null>(null);
+  const [newColumnName, setNewColumnName] = useState<string>('');
 
   // 최초 렌더링시 마운트
   useEffect(() => {
@@ -59,6 +61,7 @@ const Home = () => {
       setShowAddRowForm(false); // Hide add row form when loading table data
       setShowAddColumnForm(false);
       setEditingRow(null); // Clear editing state
+      setEditingColumn(null);
     } catch (error) {
       console.error('Error fetching table data:', error);
     }
@@ -221,6 +224,42 @@ const Home = () => {
     }
   };
 
+  const handleEditColumnClick = (column: string) => {
+    setEditingColumn(column);
+    setNewColumnName(column);
+  };
+
+  const handleColumnNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewColumnName(e.target.value);
+  };
+
+  const saveUpdatedColumn = async () => {
+    if (!selectedTable || !editingColumn || !newColumnName) return;
+
+    try {
+      const response = await fetch(
+        `${API_URL}/table/${selectedTable}/update_column`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            old_column_name: editingColumn,
+            new_column_name: newColumnName,
+          }),
+        },
+      );
+      if (!response.ok) {
+        console.error('Failed to update column:', response.statusText);
+        return;
+      }
+      setEditingColumn(null);
+      setNewColumnName('');
+      loadTableData(selectedTable);
+    } catch (error) {
+      console.error('Error updating column:', error);
+    }
+  };
+
   return (
     <div>
       <h1>Database Tables</h1>
@@ -239,7 +278,29 @@ const Home = () => {
             <thead>
               <tr>
                 {tableData.schema.map((column) => (
-                  <th key={column}>{column}</th>
+                  <th key={column}>
+                    {editingColumn === column ? (
+                      <label>
+                        {column}:
+                        <input
+                          type="text"
+                          value={newColumnName}
+                          onChange={handleColumnNameChange}
+                        />
+                      </label>
+                    ) : (
+                      column
+                    )}
+                    <button
+                      onClick={() =>
+                        editingColumn === column
+                          ? saveUpdatedColumn()
+                          : handleEditColumnClick(column)
+                      }
+                    >
+                      {editingColumn === column ? 'Save' : 'Edit Column'}
+                    </button>
+                  </th>
                 ))}
                 <th>Actions</th>
               </tr>
