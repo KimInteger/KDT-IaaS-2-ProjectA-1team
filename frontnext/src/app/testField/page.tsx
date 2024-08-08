@@ -22,7 +22,12 @@ const Home = () => {
   const [showAddRowForm, setShowAddRowForm] = useState<boolean>(false);
   const [newColumn, setNewColumn] = useState<string>('');
   const [showAddColumnForm, setShowAddColumnForm] = useState<boolean>(false);
+  const [editingRow, setEditingRow] = useState<{ [key: string]: any } | null>(
+    null,
+  );
+  const [editingRowId, setEditingRowId] = useState<number | null>(null);
 
+  // 최초 렌더링시 마운트
   useEffect(() => {
     const fetchTables = async () => {
       try {
@@ -40,6 +45,7 @@ const Home = () => {
     fetchTables();
   }, []);
 
+  // datatable reload
   const loadTableData = async (tableName: string) => {
     try {
       const response = await fetch(`${API_URL}/table/${tableName}`);
@@ -52,11 +58,13 @@ const Home = () => {
       setSelectedTable(tableName);
       setShowAddRowForm(false); // Hide add row form when loading table data
       setShowAddColumnForm(false);
+      setEditingRow(null); // Clear editing state
     } catch (error) {
       console.error('Error fetching table data:', error);
     }
   };
 
+  // 행 삭제 함수
   const deleteRow = async (rowId: number) => {
     try {
       const response = await fetch(
@@ -77,6 +85,7 @@ const Home = () => {
     }
   };
 
+  // 열 삭제 함수
   const deleteColumn = async (columnName: string) => {
     try {
       const response = await fetch(
@@ -97,6 +106,7 @@ const Home = () => {
     }
   };
 
+  // 행 추가 관련 함수
   const handleAddRowChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewRow((prev) => ({ ...prev, [name]: value }));
@@ -140,6 +150,7 @@ const Home = () => {
     }
   };
 
+  // 열 추가 관련 함수
   const handleAddColumnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewColumn(e.target.value);
   };
@@ -172,6 +183,44 @@ const Home = () => {
     setShowAddColumnForm(true);
   };
 
+  // 행 수정 관련 함수
+  const handleEditClick = (row: Row) => {
+    setEditingRow({ ...row });
+    setEditingRowId(row.rowid);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditingRow((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const saveUpdatedRow = async () => {
+    if (!selectedTable || !editingRow || editingRowId === null) return;
+
+    try {
+      const response = await fetch(
+        `${API_URL}/table/${selectedTable}/update_row`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            row_id: editingRowId,
+            updated_values: editingRow,
+          }),
+        },
+      );
+      if (!response.ok) {
+        console.error('Failed to update row:', response.statusText);
+        return;
+      }
+      setEditingRow(null);
+      setEditingRowId(null);
+      loadTableData(selectedTable);
+    } catch (error) {
+      console.error('Error updating row:', error);
+    }
+  };
+
   return (
     <div>
       <h1>Database Tables</h1>
@@ -199,9 +248,28 @@ const Home = () => {
               {tableData.rows.map((row) => (
                 <tr key={row.rowid}>
                   {tableData.schema.map((column) => (
-                    <td key={column}>{row[column]}</td>
+                    <td key={column}>
+                      {editingRowId === row.rowid ? (
+                        <label>
+                          {column}:
+                          <input
+                            type="text"
+                            name={column}
+                            value={editingRow ? editingRow[column] || '' : ''}
+                            onChange={handleInputChange}
+                          />
+                        </label>
+                      ) : (
+                        row[column]
+                      )}
+                    </td>
                   ))}
                   <td>
+                    {editingRowId === row.rowid ? (
+                      <button onClick={saveUpdatedRow}>Save</button>
+                    ) : (
+                      <button onClick={() => handleEditClick(row)}>Edit</button>
+                    )}
                     <button onClick={() => deleteRow(row.rowid)}>
                       Delete Row
                     </button>
