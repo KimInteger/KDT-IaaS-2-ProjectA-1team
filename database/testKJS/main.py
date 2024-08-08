@@ -26,6 +26,10 @@ class RowUpdateRequest(BaseModel):
     row_id: int
     updated_values: dict
 
+class ColumnUpdateRequest(BaseModel):
+    old_column_name: str
+    new_column_name: str
+
 
 def get_db_connection():
     conn = sqlite3.connect('test.db')
@@ -173,6 +177,40 @@ async def update_row(table_name: str, request: RowUpdateRequest):
     conn.commit()
     conn.close()
 
+    return {"status": "success"}
+
+@app.post("/table/{table_name}/update_column")
+async def update_column(table_name: str, request: ColumnUpdateRequest):
+    old_column_name = request.old_column_name
+    new_column_name = request.new_column_name
+
+    conn = get_db_connection()
+    
+    try:
+        conn.execute(f"PRAGMA foreign_keys=off;")
+        
+        # Create a new table with the updated column name
+        columns = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
+        column_definitions = ", ".join(
+            f"{col[1]} {col[2]}" if col[1] != old_column_name else f"{new_column_name} {col[2]}"
+            for col in columns
+        )
+        
+        conn.execute(f"CREATE TABLE new_table ({column_definitions});")
+        conn.execute(f"INSERT INTO new_table SELECT * FROM {table_name};")
+        conn.execute(f"DROP TABLE {table_name};")
+        conn.execute(f"ALTER TABLE new_table RENAME TO {table_name};")
+        
+        conn.execute(f"PRAGMA foreign_keys=on;")
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        # Ensure the temporary table is dropped
+        conn.execute(f"DROP TABLE IF EXISTS temp;")
+        conn.close()
+    
     return {"status": "success"}
 
 if __name__ == "__main__":
