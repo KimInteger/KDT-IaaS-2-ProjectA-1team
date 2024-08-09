@@ -35,7 +35,7 @@ def backup_database(backup_data):
         conn.commit()
         conn.close()
         
-        return {"message": "Backup successful", "db_name": db_name}
+        return {"message": "백업 성공적", "백업날짜": db_name}
     
     except sqlite3.DatabaseError as e:
         raise Exception(f"Database operation failed: {str(e)}")
