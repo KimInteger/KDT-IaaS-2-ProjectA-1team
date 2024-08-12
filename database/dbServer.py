@@ -6,6 +6,7 @@ from routers import table_router, data_router, create_table_router, update_table
 from pwCheange import router as pwCheange_router  # pwCheange 라우터를 임포트
 from typing import List
 from createToCopy import copy_table_structure
+from back_router import router as back_router
 
 app = FastAPI()
 
@@ -74,6 +75,8 @@ def delete_column(request: DeleteColumnRequest):
     except Exception as e:
         print(f'Error: {e}')
         raise HTTPException(status_code=500, detail=f"Column deletion failed: {str(e)}")
+
+app.include_router(back_router, prefix='/back')
 
 if __name__ == "__dbServer__":
     import uvicorn

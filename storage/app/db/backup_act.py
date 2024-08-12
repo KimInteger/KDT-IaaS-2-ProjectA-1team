@@ -1,8 +1,9 @@
 import os
 import sqlite3
 from datetime import datetime
+from models.backup_models import SaveData
 
-def backup_database(backup_data):
+def backup_database(backup_data : SaveData):
     try:
         # 데이터베이스 파일 이름 및 경로 설정
         db_name = datetime.now().strftime("%Y%m%d") + ".db"
@@ -17,6 +18,8 @@ def backup_database(backup_data):
         # 데이터베이스 연결 및 커서 생성
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
+
+        print("Received data:", backup_data)
         
         for table_name, table_data in backup_data.items():
             # 테이블 스키마 생성
