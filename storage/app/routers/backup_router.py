@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 import os
 from typing import List
 from db.backup_act import backup_database
@@ -22,11 +22,13 @@ async def get_db_names():
         raise HTTPException(status_code=500, detail=f"Error accessing backup directory: {str(e)}")
 
 @router.post('/save')
-async def save(data:SaveData):
+async def save(request : Request):
     try : 
+        data = await request.json()
         result = backup_database(data)
         return result
     except Exception as e:
+        print(f"Unexpected error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     
 @router.post("/load")

@@ -1,8 +1,9 @@
 import os
 import sqlite3
 from datetime import datetime
+from models.backup_models import SaveData
 
-def backup_database(backup_data):
+def backup_database(backup_data : SaveData):
     try:
         # 데이터베이스 파일 이름 및 경로 설정
         db_name = datetime.now().strftime("%Y%m%d") + ".db"
@@ -17,11 +18,16 @@ def backup_database(backup_data):
         # 데이터베이스 연결 및 커서 생성
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
+
+        print("Received data:", backup_data)
         
-        for table_name, table_data in backup_data.items():
+        for table_name, table_data in backup_data['backup_data'].items():
             # 테이블 스키마 생성
             schema = table_data['schema']
-            columns = [f"{col[1]} {col[2]}" for col in schema]
+            columns = [
+                f"{col['name']} {col['type']}{' PRIMARY KEY' if col['pk'] else ''}" 
+                for col in schema
+            ]
             create_table_query = f"CREATE TABLE {table_name} ({', '.join(columns)});"
             cursor.execute(create_table_query)
             
@@ -33,11 +39,13 @@ def backup_database(backup_data):
         
         # 변경사항 저장 및 연결 종료
         conn.commit()
-        conn.close()
-        
         return {"message": "Backup successful", "db_name": db_name}
     
     except sqlite3.DatabaseError as e:
+        conn.rollback()  # 데이터베이스 상태를 롤백
         raise Exception(f"Database operation failed: {str(e)}")
     except Exception as e:
+        conn.rollback()  # 데이터베이스 상태를 롤백
         raise Exception(f"Backup failed: {str(e)}")
+    finally:
+        conn.close()

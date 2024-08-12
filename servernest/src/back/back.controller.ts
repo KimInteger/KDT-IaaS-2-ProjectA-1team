@@ -49,7 +49,7 @@ export class BackController {
       const responseFrom8080 = await fetch(
         `http://localhost:${this.backPort}/back/save`,
         {
-          method: 'GET',
+          method: 'POST',
         },
       );
 
