@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import sqlite3
 from routers.routers import table_router, data_router, create_table_router, update_table_router
 from routers.pwChange import router as pwCheange_router  # pwCheange 라우터를 임포트
+from routers.back_router import router as back_router
 from typing import List
 from db.createToCopy import copy_table_structure
 
@@ -43,6 +44,7 @@ app.include_router(data_router)  # data_router를 추가한다.
 app.include_router(create_table_router)  # create_table_router를 추가한다.
 app.include_router(pwCheange_router)  # pwCheange 라우터를 추가
 app.include_router(update_table_router)  # pwCheange 라우터를 추가
+app.include_router(back_router, prefix='/back')
 
 class Recommend(BaseModel):
     table: str
