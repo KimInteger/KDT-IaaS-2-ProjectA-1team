@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Union
 router = APIRouter()
 
 # 데이터베이스 파일의 경로
-DBPATH = "정호연.db"
+DBPATH = "./data/정호연.db"
 
 
 # 테이블 스키마를 정의하는 모델
