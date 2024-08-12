@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import TotalStyles from '../styles/TotalStyles';
 import { useLanguage } from './LanguageContext';
 import PasswordChangeForm from './PWChangeForm';
+import BackupRestoreModal from './BackupRestoreModal';
 
 const UserManagement = () => {
   const { language } = useLanguage();
 
+  const [isBackup, setIsBackup] = useState(false);
+
+  const openBackupModal = () => setIsBackup(true);
+  const closeBackupModal = () => setIsBackup(false);
   const texts = {
     ko: {
       createDeleteAccount: '사용자 계정 생성 및 삭제',
@@ -64,10 +69,11 @@ const UserManagement = () => {
         <button className={TotalStyles.SettingButton}>
           {texts[language].setNotifications}
         </button>
-        <button className={TotalStyles.SettingButton}>
+        <button className={TotalStyles.SettingButton} onClick={openBackupModal}>
           {texts[language].backupRestore}
         </button>
       </div>
+      {isBackup && <BackupRestoreModal onClose={closeBackupModal} />}
     </div>
   );
 };
